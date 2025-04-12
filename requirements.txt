@@ -1,0 +1,11 @@
+langchain
+pymilvus
+aiohttp
+numpy
+tenacity
+python-dotenv
+requests
+bs4
+langchain_milvus
+tavily-python
+langchain_openai
