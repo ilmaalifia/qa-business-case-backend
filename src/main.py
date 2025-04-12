@@ -11,12 +11,10 @@ load_dotenv()
 if __name__ == "__main__":
     retriever = Retriever()
     generator = Generator()
-    prompt = generator.get_prompt()
-    llm = generator.get_llm()
     chain = (
         {"context": retriever(), "question": RunnablePassthrough()}
-        | prompt
-        | llm
+        | generator.get_prompt()
+        | generator.get_llm()
         | StrOutputParser()
     )
     question = "What is virtual power plant?"
