@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from dotenv import load_dotenv
@@ -8,11 +9,11 @@ from langchain_community.retrievers.tavily_search_api import (
 )
 from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_milvus import Milvus
+from langchain_milvus import BM25BuiltInFunction, Milvus
+from utils import setup_logger
 
+logger = setup_logger(__name__)
 load_dotenv()
-
-URI = "./milvus_demo.db"
 
 
 class Retriever:
@@ -22,28 +23,55 @@ class Retriever:
         top_k_tavily: int = 20,
     ):
         self.model_embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={"device": "cpu"},
+            model_name=os.getenv("DENSE_MODEL")
         )
+
         self.milvus = Milvus(
-            embedding_function=self.model_embeddings,
-            collection_name="pdf",
-            connection_args={"uri": URI},
+            embedding_function=[self.model_embeddings],
+            collection_name=os.getenv("MILVUS_COLLECTION", "pdf"),
+            connection_args={
+                "uri": os.getenv("MILVUS_URI"),
+                "token": os.getenv("MILVUS_TOKEN"),
+            },
+            vector_field=["dense_vector", "sparse_vector"],
+            builtin_function=BM25BuiltInFunction(
+                input_field_names="text",
+                output_field_names="sparse_vector",
+                analyzer_params={"type": "english"},
+                function_name="bm25_function",
+            ),
+            search_params=[
+                {
+                    "metric_type": "COSINE",
+                },
+                {
+                    "metric_type": "BM25",
+                },
+            ],
         )
+
         self.tavily = TavilySearchAPIRetriever(
-            k=top_k_tavily, search_depth=SearchDepth.ADVANCED
+            k=top_k_tavily,
+            search_depth=SearchDepth.ADVANCED,
         )
+
         self.retriever = EnsembleRetriever(
             retrievers=[
-                self.milvus.as_retriever(search_kwargs={"k": top_k_milvus}),
+                self.milvus.as_retriever(
+                    search_kwargs={
+                        "k": top_k_milvus,
+                        "ranker_type": "rrf",
+                        "ranker_params": {"k": 60},
+                    }
+                ),
                 self.tavily,
             ],
-            weights=[0.5, 0.5],
         )
 
     def retrieve(self, query: str) -> List[Document]:
         return self.retriever.invoke(query)
 
+    # TODO: Manage doc positioning
     def format_docs(self, docs):
         return "\n\n".join(doc.page_content for doc in docs)
 
@@ -55,5 +83,5 @@ if __name__ == "__main__":
     r = Retriever()
     query = "What is virtual power plant?"
     result = r.retrieve(query)
-    print(f"Query: {query}")
-    print(f"Result: {result}")
+    logger.info(f"Query: {query}")
+    logger.info(f"Result: {result}")
