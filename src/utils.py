@@ -1,6 +1,10 @@
 import logging
 import sys
 
+TIMEOUT = 20  # seconds
+MAX_RETRY = 2
+RRF_CONSTANT = 60
+
 
 def setup_logger(name=__name__):
     logger = logging.getLogger(name)

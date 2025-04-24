@@ -10,7 +10,7 @@ from langchain_community.retrievers.tavily_search_api import (
 from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_milvus import BM25BuiltInFunction, Milvus
-from utils import setup_logger
+from utils import RRF_CONSTANT, setup_logger
 
 logger = setup_logger(__name__)
 load_dotenv()
@@ -53,6 +53,7 @@ class Retriever:
         self.tavily = TavilySearchAPIRetriever(
             k=top_k_tavily,
             search_depth=SearchDepth.ADVANCED,
+            tags=["tavily"],
         )
 
         self.retriever = EnsembleRetriever(
@@ -61,27 +62,25 @@ class Retriever:
                     search_kwargs={
                         "k": top_k_milvus,
                         "ranker_type": "rrf",
-                        "ranker_params": {"k": 60},
-                    }
+                        "ranker_params": {"k": RRF_CONSTANT},
+                    },
+                    tags=["milvus"],
                 ),
                 self.tavily,
             ],
+            c=RRF_CONSTANT,
+            id_key="source",
         )
 
     def retrieve(self, query: str) -> List[Document]:
         return self.retriever.invoke(query)
 
-    # TODO: Manage doc positioning
+    # TODO: Manage doc positioning based on research
     def format_docs(self, docs):
-        return "\n\n".join(doc.page_content for doc in docs)
+        return "\n\n---\n\n".join(
+            f"Source: {doc.metadata['source']}\nPage: {doc.metadata.get("page")}\nInformation: {doc.page_content}"
+            for doc in docs[:5]
+        )
 
     def __call__(self):
         return self.retriever | self.format_docs
-
-
-if __name__ == "__main__":
-    r = Retriever()
-    query = "What is virtual power plant?"
-    result = r.retrieve(query)
-    logger.info(f"Query: {query}")
-    logger.info(f"Result: {result}")
