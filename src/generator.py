@@ -1,73 +1,25 @@
 import os
+from typing import List
 
+from dotenv import load_dotenv
+from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_deepseek import ChatDeepSeek
 from langchain_openai import ChatOpenAI
-from utils import MAX_RETRY, TIMEOUT
+from src.state import OutputState
+from src.utils import MAX_RETRY, TIMEOUT
 
-cited_answer_schema = {
-    "title": "cited_answer",
-    "description": "Answer the user question based only on the given context, and cite the sources used.",
-    "type": "object",
-    "properties": {
-        "answer": {
-            "type": "string",
-            "description": "The answer to the user question, which is based only on the given sources. If the given sources are insufficient, the answer should explain that the sources are insufficient.",
-        },
-        "citations": {
-            "type": "array",
-            "description": "The list of citations used to justify the answer.",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "The valid URL of the SPECIFIC source which justifies the answer.",
-                    },
-                    "page": {
-                        "type": "integer",
-                        "description": "The page number of the PDF source which justifies the answer.",
-                    },
-                },
-                "required": ["url"],
-            },
-        },
-        "more_sources": {
-            "type": "array",
-            "description": "The list of URLs of the sources which are NOT USED to justify the answer but exist in given context.",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "The valid URL of the SPECIFIC source which is NOT USED to justifies the answer.",
-                    },
-                    "page": {
-                        "type": "integer",
-                        "description": "The page number of the PDF source which is NOT USED to justifies the answer.",
-                    },
-                    "snippet": {
-                        "type": "string",
-                        "description": "The snippet of the source which is NOT USED to justifies the answer.",
-                    },
-                },
-                "required": ["url", "snippet"],
-            },
-        },
-    },
-    "required": ["answer", "citations"],
-}
+load_dotenv()
 
 
 class Generator:
     def __init__(self):
         self.prompt = ChatPromptTemplate.from_template(
             """You are a helpful assistant that answers question based on the context provided. If you don't know the answer or the context is insufficient, explain it clearly.
-
-            Context:
-            {context}
-
-            Question: {question}"""
+        Context:
+        {context}
+            
+        Question: {question}"""
         )
 
         llm_provider = (os.getenv("LLM_PROVIDER", "")).upper()
@@ -85,8 +37,37 @@ class Generator:
             case _:
                 raise ValueError(f"Unsupported LLM provider: {llm_provider}")
 
+    # TODO: Manage doc positioning based on research
+    def format_docs_as_context(self, docs: List[Document]):
+        return "\n\n---\n\n".join(
+            f"Source: {doc.metadata['source']}\nPage: {doc.metadata.get("page")}\nInformation: {doc.page_content}"
+            for doc in docs
+        )
+
+    def __call__(self):
+        return self.prompt | self.llm.with_structured_output(OutputState)
+
     def get_prompt(self):
         return self.prompt
 
     def get_llm(self):
-        return self.llm.with_structured_output(cited_answer_schema)
+        return self.llm.with_structured_output(OutputState)
+
+
+if __name__ == "__main__":
+    """Test the system using LangChain Expression Language (LCEL)"""
+    from langchain_core.runnables import RunnablePassthrough
+    from src.retriever import Retriever
+    from src.utils import setup_logger
+
+    retriever = Retriever()
+    generator = Generator()
+    chain = {
+        "context": retriever() | generator.format_docs_as_context,
+        "question": RunnablePassthrough(),
+    } | generator()
+
+    question = "What is virtual power plant?"
+    result = chain.invoke(question)
+    print(f"Question: {question}")
+    print(f"Result: {result}")

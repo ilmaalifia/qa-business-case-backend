@@ -4,6 +4,7 @@ import sys
 TIMEOUT = 20  # seconds
 MAX_RETRY = 2
 RRF_CONSTANT = 60
+CONTEXT_DOCS = 5
 
 
 def setup_logger(name=__name__):

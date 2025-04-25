@@ -10,7 +10,7 @@ from langchain_community.retrievers.tavily_search_api import (
 from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_milvus import BM25BuiltInFunction, Milvus
-from utils import RRF_CONSTANT, setup_logger
+from src.utils import RRF_CONSTANT, setup_logger
 
 logger = setup_logger(__name__)
 load_dotenv()
@@ -72,15 +72,5 @@ class Retriever:
             id_key="source",
         )
 
-    def retrieve(self, query: str) -> List[Document]:
-        return self.retriever.invoke(query)
-
-    # TODO: Manage doc positioning based on research
-    def format_docs(self, docs):
-        return "\n\n---\n\n".join(
-            f"Source: {doc.metadata['source']}\nPage: {doc.metadata.get("page")}\nInformation: {doc.page_content}"
-            for doc in docs[:5]
-        )
-
     def __call__(self):
-        return self.retriever | self.format_docs
+        return self.retriever
