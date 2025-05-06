@@ -82,4 +82,5 @@ if __name__ == "__main__":
 
     question = "What is virtual power plant?"
     result = chain.invoke(question)
+    print(question)
     print(result)
