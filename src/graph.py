@@ -1,18 +1,8 @@
 from dotenv import load_dotenv
-from langchain_core.runnables import (
-    RunnableLambda,
-    RunnableParallel,
-    RunnablePassthrough,
-)
 from langgraph.graph import END, START, StateGraph
 from src.generator import Generator
 from src.retriever import Retriever
-from src.state import (
-    ContextState,
-    InputState,
-    OutputState,
-    convert_document_to_additional_source,
-)
+from src.state import ContextState, State, convert_document_to_additional_source
 from src.utils import CONTEXT_DOCS
 
 load_dotenv()
@@ -21,8 +11,8 @@ retriever = Retriever()
 generator = Generator()
 
 
-def retriever_node(input_state: InputState) -> ContextState:
-    retrieved_docs = retriever().invoke(input_state["question"])
+async def retriever_node(input_state: State) -> ContextState:
+    retrieved_docs = await retriever().ainvoke(input_state["question"])
     return {
         "question": input_state["question"],
         "context": retrieved_docs[:CONTEXT_DOCS],
@@ -30,26 +20,28 @@ def retriever_node(input_state: InputState) -> ContextState:
     }
 
 
-def generator_node(context_state: ContextState) -> OutputState:
-    prompt = generator.get_prompt().invoke(
+async def generator_node(context_state: ContextState) -> State:
+    prompt = await generator.get_prompt().ainvoke(
         {
-            "context": generator.format_docs_as_context(context_state["context"]),
             "question": context_state["question"],
+            "context": generator.format_docs_as_context(context_state["context"]),
         }
     )
-    response = generator.get_llm().invoke(prompt)
+    response = await generator.get_llm().ainvoke(prompt)
+    additional_sources_from_context_state = [
+        convert_document_to_additional_source(doc)
+        for doc in context_state["additional_sources"]
+    ]
     return {
+        "question": context_state["question"],
         "answer": response["answer"],
         "citations": response["citations"],
         "additional_sources": response["additional_sources"]
-        + [
-            convert_document_to_additional_source(doc)
-            for doc in context_state["additional_sources"]
-        ],
+        + additional_sources_from_context_state,
     }
 
 
-builder = StateGraph(InputState)
+builder = StateGraph(State)
 builder.add_node("retriever", retriever_node)
 builder.add_node("generator", generator_node)
 builder.add_edge(START, "retriever")

@@ -6,20 +6,22 @@ from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_deepseek import ChatDeepSeek
 from langchain_openai import ChatOpenAI
-from src.state import OutputState
-from src.utils import MAX_RETRY, TIMEOUT
+from src.state import State
+from src.utils import CONTEXT_DOCS, MAX_RETRY, TIMEOUT
 
 load_dotenv()
 
 
 class Generator:
     def __init__(self):
-        self.prompt = ChatPromptTemplate.from_template(
-            """You are a helpful assistant that answers question based on the context provided. If you don't know the answer or the context is insufficient, explain it clearly.
-        Context:
-        {context}
-            
-        Question: {question}"""
+        self.prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    f"You are a helpful assistant that answers a question based on the {CONTEXT_DOCS} context documents provided. If you don't know the answer or the context is insufficient, then never hallucinate and explain it clearly.",
+                ),
+                ("human", "Context:\n{context}\n\nQuestion: {question}"),
+            ],
         )
 
         llm_provider = (os.getenv("LLM_PROVIDER", "")).upper()
@@ -45,20 +47,19 @@ class Generator:
         )
 
     def __call__(self):
-        return self.prompt | self.llm.with_structured_output(OutputState)
+        return self.prompt | self.llm.with_structured_output(State)
 
     def get_prompt(self):
         return self.prompt
 
     def get_llm(self):
-        return self.llm.with_structured_output(OutputState)
+        return self.llm.with_structured_output(State)
 
 
 if __name__ == "__main__":
     """Test the system using LangChain Expression Language (LCEL)"""
     from langchain_core.runnables import RunnablePassthrough
     from src.retriever import Retriever
-    from src.utils import setup_logger
 
     retriever = Retriever()
     generator = Generator()

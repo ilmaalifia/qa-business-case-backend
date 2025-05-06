@@ -1,5 +1,4 @@
 import os
-from typing import List
 
 from dotenv import load_dotenv
 from langchain.retrievers import EnsembleRetriever
@@ -7,7 +6,6 @@ from langchain_community.retrievers.tavily_search_api import (
     SearchDepth,
     TavilySearchAPIRetriever,
 )
-from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_milvus import BM25BuiltInFunction, Milvus
 from src.utils import RRF_CONSTANT, setup_logger
@@ -58,15 +56,17 @@ class Retriever:
 
         self.retriever = EnsembleRetriever(
             retrievers=[
+                self.tavily,
                 self.milvus.as_retriever(
                     search_kwargs={
                         "k": top_k_milvus,
                         "ranker_type": "rrf",
                         "ranker_params": {"k": RRF_CONSTANT},
+                        "group_by_field": "source",
+                        "group_size": 5,
                     },
                     tags=["milvus"],
                 ),
-                self.tavily,
             ],
             c=RRF_CONSTANT,
             id_key="source",

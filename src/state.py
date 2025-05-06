@@ -33,10 +33,6 @@ class AdditionalSource(TypedDict):
     ]
 
 
-class InputState(TypedDict):
-    question: Annotated[str, ..., "The question asked by the user."]
-
-
 class ContextState(TypedDict):
     question: Annotated[str, ..., "The question asked by the user."]
     context: Annotated[
@@ -51,26 +47,27 @@ class ContextState(TypedDict):
     ]
 
 
-class OutputState(TypedDict):
-    """Answer the user question based only on the given context and cite the sources used. Unused context should be listed as more sources."""
-
+class State(TypedDict):
+    question: Annotated[str, ..., "The question asked by the user."]
     answer: Annotated[
         str,
         ...,
-        "The answer to the user question, which is based only on the given sources. If the given sources are insufficient, the answer should explain that the sources are insufficient.",
+        "The answer to the user question, which is based only on the given context. If the given context is insufficient, the answer should explain that the context is insufficient.",
     ]
     citations: Annotated[
-        List[Citation], ..., "The list of citations used to justify the answer."
+        List[Citation],
+        ...,
+        "The list of citations used to justify the answer and exist in the given context. If the given context is not used as citation, move it to additional_sources.",
     ]
     additional_sources: Annotated[
         Optional[List[AdditionalSource]],
         [],
-        "The list of URLs of the sources which are NOT USED to justify the answer but exist in given context.",
+        "The list of URLs of the sources which are NOT USED to justify the answer but exist in the given context.",
     ]
 
 
 def convert_document_to_additional_source(doc: Document) -> AdditionalSource:
-    """Convert a Document to an AdditionalSource."""
+    """Convert a Document to an Additional Source."""
     return {
         "url": doc.metadata["source"],
         "snippet": doc.page_content,
