@@ -33,7 +33,36 @@ class AdditionalSource(TypedDict):
     ]
 
 
+class InputState(TypedDict):
+    """Input state for graph"""
+
+    question: Annotated[str, ..., "The question asked by the user."]
+
+
+class OverallState(TypedDict):
+    """Overall state for graph"""
+
+    question: Annotated[str, ..., "The question asked by the user."]
+    answer: Annotated[
+        str,
+        ...,
+        "The answer to the user question, which is based only on the given context. If the given context is insufficient, the answer should explain that the context is insufficient.",
+    ]
+    citations: Annotated[
+        List[Citation],
+        ...,
+        "The list of citations used to justify the answer and exist in the given context. If the given context is not used as citation, move it to additional_sources.",
+    ]
+    additional_sources: Annotated[
+        Optional[List[AdditionalSource]],
+        [],
+        "The list of URLs of the sources which are NOT USED to justify the answer but exist in the given context.",
+    ]
+
+
 class ContextState(TypedDict):
+    """Intermediate state for graph"""
+
     question: Annotated[str, ..., "The question asked by the user."]
     context: Annotated[
         List[Document],
@@ -47,8 +76,9 @@ class ContextState(TypedDict):
     ]
 
 
-class State(TypedDict):
-    question: Annotated[str, ..., "The question asked by the user."]
+class OutputState(TypedDict):
+    """Output state for graph and output schema for LLM. Question is omitted to save completion tokens in LLM."""
+
     answer: Annotated[
         str,
         ...,

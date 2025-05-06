@@ -7,7 +7,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda
 from langchain_deepseek import ChatDeepSeek
 from langchain_openai import ChatOpenAI
-from src.state import State
+from src.state import OutputState
 from src.utils import CONTEXT_DOCS, MAX_RETRY, TIMEOUT
 
 load_dotenv()
@@ -48,21 +48,20 @@ class Generator:
         )
 
     def __call__(self):
-        return self.prompt | self.llm.with_structured_output(State).with_fallbacks(
-            self.__generator_fallback()
-        )
+        return self.get_prompt() | self.get_llm()
 
     def get_prompt(self):
         return self.prompt
 
     def get_llm(self):
-        return self.llm.with_structured_output(State)
+        return self.llm.with_structured_output(OutputState).with_fallbacks(
+            self.__generator_fallback()
+        )
 
     def __generator_fallback(self):
         return [
             RunnableLambda(
                 lambda x: {
-                    "question": x["question"],
                     "answer": f"Unable to answer the question with context below: {x['context']}\n\nPlease try again.",
                 }
             )

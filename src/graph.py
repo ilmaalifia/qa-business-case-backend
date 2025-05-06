@@ -2,7 +2,13 @@ from dotenv import load_dotenv
 from langgraph.graph import END, START, StateGraph
 from src.generator import Generator
 from src.retriever import Retriever
-from src.state import ContextState, State, convert_document_to_additional_source
+from src.state import (
+    ContextState,
+    InputState,
+    OutputState,
+    OverallState,
+    convert_document_to_additional_source,
+)
 from src.utils import CONTEXT_DOCS
 
 load_dotenv()
@@ -11,7 +17,7 @@ retriever = Retriever()
 generator = Generator()
 
 
-async def retriever_node(state: State) -> ContextState:
+async def retriever_node(state: InputState) -> ContextState:
     retrieved_docs = await retriever().ainvoke(state["question"])
     return {
         "question": state["question"],
@@ -20,7 +26,7 @@ async def retriever_node(state: State) -> ContextState:
     }
 
 
-async def generator_node(context_state: ContextState) -> State:
+async def generator_node(context_state: ContextState) -> OutputState:
     prompt = await generator.get_prompt().ainvoke(
         {
             "question": context_state["question"],
@@ -33,7 +39,6 @@ async def generator_node(context_state: ContextState) -> State:
         for doc in context_state["additional_sources"]
     ]
     return {
-        "question": response.get("question"),
         "answer": response.get("answer"),
         "citations": response.get("citations", []),
         "additional_sources": response.get("additional_sources", [])
@@ -41,7 +46,7 @@ async def generator_node(context_state: ContextState) -> State:
     }
 
 
-builder = StateGraph(State)
+builder = StateGraph(OverallState, input=InputState, output=OutputState)
 builder.add_node("retriever", retriever_node)
 builder.add_node("generator", generator_node)
 builder.add_edge(START, "retriever")
