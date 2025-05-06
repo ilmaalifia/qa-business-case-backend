@@ -4,6 +4,7 @@ from typing import List
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableLambda
 from langchain_deepseek import ChatDeepSeek
 from langchain_openai import ChatOpenAI
 from src.state import State
@@ -47,13 +48,25 @@ class Generator:
         )
 
     def __call__(self):
-        return self.prompt | self.llm.with_structured_output(State)
+        return self.prompt | self.llm.with_structured_output(State).with_fallbacks(
+            self.__generator_fallback()
+        )
 
     def get_prompt(self):
         return self.prompt
 
     def get_llm(self):
         return self.llm.with_structured_output(State)
+
+    def __generator_fallback(self):
+        return [
+            RunnableLambda(
+                lambda x: {
+                    "question": x["question"],
+                    "answer": f"Unable to answer the question with context below: {x['context']}\n\nPlease try again.",
+                }
+            )
+        ]
 
 
 if __name__ == "__main__":
@@ -70,5 +83,4 @@ if __name__ == "__main__":
 
     question = "What is virtual power plant?"
     result = chain.invoke(question)
-    print(f"Question: {question}")
-    print(f"Result: {result}")
+    print(result)

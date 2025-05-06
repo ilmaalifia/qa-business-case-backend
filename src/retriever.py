@@ -6,6 +6,7 @@ from langchain_community.retrievers.tavily_search_api import (
     SearchDepth,
     TavilySearchAPIRetriever,
 )
+from langchain_core.runnables import RunnableLambda
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_milvus import BM25BuiltInFunction, Milvus
 from src.utils import RRF_CONSTANT, setup_logger
@@ -52,7 +53,7 @@ class Retriever:
             k=top_k_tavily,
             search_depth=SearchDepth.ADVANCED,
             tags=["tavily"],
-        )
+        ).with_fallbacks(self.__retriever_fallback())
 
         self.retriever = EnsembleRetriever(
             retrievers=[
@@ -66,7 +67,7 @@ class Retriever:
                         "group_size": 5,
                     },
                     tags=["milvus"],
-                ),
+                ).with_fallbacks(self.__retriever_fallback()),
             ],
             c=RRF_CONSTANT,
             id_key="source",
@@ -74,3 +75,6 @@ class Retriever:
 
     def __call__(self):
         return self.retriever
+
+    def __retriever_fallback(self):
+        return [RunnableLambda(lambda x: [])]

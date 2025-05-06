@@ -11,10 +11,10 @@ retriever = Retriever()
 generator = Generator()
 
 
-async def retriever_node(input_state: State) -> ContextState:
-    retrieved_docs = await retriever().ainvoke(input_state["question"])
+async def retriever_node(state: State) -> ContextState:
+    retrieved_docs = await retriever().ainvoke(state["question"])
     return {
-        "question": input_state["question"],
+        "question": state["question"],
         "context": retrieved_docs[:CONTEXT_DOCS],
         "additional_sources": retrieved_docs[CONTEXT_DOCS:],
     }
@@ -33,10 +33,10 @@ async def generator_node(context_state: ContextState) -> State:
         for doc in context_state["additional_sources"]
     ]
     return {
-        "question": context_state["question"],
-        "answer": response["answer"],
-        "citations": response["citations"],
-        "additional_sources": response["additional_sources"]
+        "question": response.get("question"),
+        "answer": response.get("answer"),
+        "citations": response.get("citations", []),
+        "additional_sources": response.get("additional_sources", [])
         + additional_sources_from_context_state,
     }
 
