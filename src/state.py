@@ -94,12 +94,3 @@ class OutputState(TypedDict):
         [],
         "The list of URLs of the sources which are NOT USED to justify the answer but exist in the given context.",
     ]
-
-
-def convert_document_to_additional_source(doc: Document) -> AdditionalSource:
-    """Convert a Document to an Additional Source."""
-    return {
-        "url": doc.metadata["source"],
-        "snippet": doc.page_content,
-        "page": doc.metadata.get("page"),
-    }

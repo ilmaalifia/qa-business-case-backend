@@ -21,24 +21,16 @@ class Retriever:
         top_k_milvus: int = 20,
         top_k_tavily: int = 20,
     ):
-        self.model_embeddings = HuggingFaceEmbeddings(
-            model_name=os.getenv("DENSE_MODEL")
-        )
-
-        self.milvus = Milvus(
-            embedding_function=[self.model_embeddings],
+        milvus_client = Milvus(
+            embedding_function=[
+                HuggingFaceEmbeddings(model_name=os.getenv("DENSE_MODEL"))
+            ],
             collection_name=os.getenv("MILVUS_COLLECTION", "pdf"),
             connection_args={
                 "uri": os.getenv("MILVUS_URI"),
                 "token": os.getenv("MILVUS_TOKEN"),
             },
             vector_field=["dense_vector", "sparse_vector"],
-            builtin_function=BM25BuiltInFunction(
-                input_field_names="text",
-                output_field_names="sparse_vector",
-                analyzer_params={"type": "english"},
-                function_name="bm25_function",
-            ),
             search_params=[
                 {
                     "metric_type": "COSINE",
@@ -47,7 +39,24 @@ class Retriever:
                     "metric_type": "BM25",
                 },
             ],
+            builtin_function=BM25BuiltInFunction(
+                input_field_names="text",
+                output_field_names="sparse_vector",
+                analyzer_params={"type": "english"},
+                function_name="bm25_function",
+            ),
         )
+
+        self.milvus = milvus_client.as_retriever(
+            search_kwargs={
+                "k": top_k_milvus,
+                "ranker_type": "rrf",
+                "ranker_params": {"k": RRF_CONSTANT},
+                "group_by_field": "source",
+                "group_size": 5,
+            },
+            tags=["milvus"],
+        ).with_fallbacks(self.__retriever_fallback())
 
         self.tavily = TavilySearchAPIRetriever(
             k=top_k_tavily,
@@ -55,20 +64,11 @@ class Retriever:
             tags=["tavily"],
         ).with_fallbacks(self.__retriever_fallback())
 
-        self.retriever = EnsembleRetriever(
-            retrievers=[
-                self.tavily,
-                self.milvus.as_retriever(
-                    search_kwargs={
-                        "k": top_k_milvus,
-                        "ranker_type": "rrf",
-                        "ranker_params": {"k": RRF_CONSTANT},
-                        "group_by_field": "source",
-                        "group_size": 5,
-                    },
-                    tags=["milvus"],
-                ).with_fallbacks(self.__retriever_fallback()),
-            ],
+        self.retriever = self.__setup_ensemble_retriever(self.tavily, self.milvus)
+
+    def __setup_ensemble_retriever(self, *retrievers):
+        return EnsembleRetriever(
+            retrievers=list(retrievers),
             c=RRF_CONSTANT,
             id_key="source",
         )

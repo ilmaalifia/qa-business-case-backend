@@ -7,6 +7,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda
 from langchain_deepseek import ChatDeepSeek
 from langchain_openai import ChatOpenAI
+from openai import APIError, APITimeoutError, BadRequestError
 from src.state import OutputState
 from src.utils import CONTEXT_DOCS, MAX_RETRY, TIMEOUT
 
@@ -21,7 +22,7 @@ class Generator:
                     "system",
                     f"You are a helpful assistant that answers a question based on the {CONTEXT_DOCS} context documents provided. If you don't know the answer or the context is insufficient, then never hallucinate and explain it clearly.",
                 ),
-                ("human", "Context:\n{context}\n\nQuestion: {question}"),
+                ("human", "Context: {context}\nQuestion: {question}"),
             ],
         )
 
@@ -42,9 +43,13 @@ class Generator:
 
     # TODO: Manage doc positioning based on research
     def format_docs_as_context(self, docs: List[Document]):
-        return "\n\n---\n\n".join(
-            f"Source: {doc.metadata['source']}\nPage: {doc.metadata.get("page")}\nInformation: {doc.page_content}"
-            for doc in docs
+        return (
+            "\n"
+            + "\n\n---\n\n".join(
+                f"Source: {doc.metadata['source']}\nPage: {doc.metadata.get("page")}\nInformation: {doc.page_content}"
+                for doc in docs
+            )
+            + "\n"
         )
 
     def __call__(self):
@@ -55,32 +60,17 @@ class Generator:
 
     def get_llm(self):
         return self.llm.with_structured_output(OutputState).with_fallbacks(
-            self.__generator_fallback()
+            self.__generator_fallback(),
+            exceptions_to_handle=(APIError, APITimeoutError, BadRequestError),
         )
 
     def __generator_fallback(self):
         return [
             RunnableLambda(
                 lambda x: {
-                    "answer": f"Unable to answer the question with context below: {x['context']}\n\nPlease try again.",
+                    "answer": "Unable to answer the question due to error. Please try again.",
+                    "citations": [],
+                    "additional_sources": [],
                 }
             )
         ]
-
-
-if __name__ == "__main__":
-    """Test the system using LangChain Expression Language (LCEL)"""
-    from langchain_core.runnables import RunnablePassthrough
-    from src.retriever import Retriever
-
-    retriever = Retriever()
-    generator = Generator()
-    chain = {
-        "context": retriever() | generator.format_docs_as_context,
-        "question": RunnablePassthrough(),
-    } | generator()
-
-    question = "What is virtual power plant?"
-    result = chain.invoke(question)
-    print(question)
-    print(result)

@@ -2,14 +2,8 @@ from dotenv import load_dotenv
 from langgraph.graph import END, START, StateGraph
 from src.generator import Generator
 from src.retriever import Retriever
-from src.state import (
-    ContextState,
-    InputState,
-    OutputState,
-    OverallState,
-    convert_document_to_additional_source,
-)
-from src.utils import CONTEXT_DOCS
+from src.state import ContextState, InputState, OutputState, OverallState
+from src.utils import CONTEXT_DOCS, convert_document_to_additional_source
 
 load_dotenv()
 
