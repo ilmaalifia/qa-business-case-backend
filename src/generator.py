@@ -30,13 +30,17 @@ class Generator:
         match llm_provider:
             case "OPENAI":
                 self.llm = ChatOpenAI(
-                    model="gpt-4o", timeout=TIMEOUT, max_retries=MAX_RETRY
+                    model="gpt-4o",
+                    timeout=TIMEOUT,
+                    max_retries=MAX_RETRY,
+                    tags=[llm_provider.lower()],
                 )
             case "DEEPSEEK":
                 self.llm = ChatDeepSeek(
                     model="deepseek-chat",  # DeepSeek V3
                     timeout=TIMEOUT,
                     max_retries=MAX_RETRY,
+                    tags=[llm_provider.lower()],
                 )
             case _:
                 raise ValueError(f"Unsupported LLM provider: {llm_provider}")

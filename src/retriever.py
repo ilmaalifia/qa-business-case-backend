@@ -71,6 +71,7 @@ class Retriever:
             retrievers=list(retrievers),
             c=RRF_CONSTANT,
             id_key="source",
+            tags=["ensemble"],
         )
 
     def __call__(self):
