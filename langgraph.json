@@ -1,9 +1,8 @@
 {
-    "dependencies": ["requirements.txt"],
+    "dependencies": ["."],
     "graphs": {
-        "qa_system_for_business_case": "./src/graph.py:graph"
+        "qa_system_for_business_case": "./app/graph.py:graph"
     },
     "env": ".env",
     "python_version": "3.13"
 }
-  

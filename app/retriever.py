@@ -1,5 +1,6 @@
 import os
 
+from app.utils import RRF_CONSTANT, setup_logger
 from dotenv import load_dotenv
 from langchain.retrievers import EnsembleRetriever
 from langchain_community.retrievers.tavily_search_api import (
@@ -9,7 +10,6 @@ from langchain_community.retrievers.tavily_search_api import (
 from langchain_core.runnables import RunnableLambda
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_milvus import BM25BuiltInFunction, Milvus
-from src.utils import RRF_CONSTANT, setup_logger
 
 logger = setup_logger(__name__)
 load_dotenv()

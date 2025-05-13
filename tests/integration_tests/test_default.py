@@ -2,11 +2,11 @@ import json
 import unittest
 
 import pytest
+from app.generator import Generator
+from app.retriever import Retriever
+from app.state import OutputState
 from langchain_core.runnables import RunnablePassthrough
 from pydantic import ValidationError
-from src.generator import Generator
-from src.retriever import Retriever
-from src.state import OutputState
 
 
 class TestDefault(unittest.TestCase):

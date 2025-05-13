@@ -3,6 +3,8 @@ from typing import Any
 from unittest.mock import patch
 
 import httpx
+from app.generator import Generator
+from app.utils import convert_document_to_additional_source
 from langchain_core.documents import Document
 from langchain_core.prompts import (
     HumanMessagePromptTemplate,
@@ -10,8 +12,6 @@ from langchain_core.prompts import (
 )
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from openai import RateLimitError
-from src.generator import Generator
-from src.utils import convert_document_to_additional_source
 
 DOCS = [
     Document(
@@ -80,10 +80,10 @@ class TestGenerator(unittest.TestCase):
             return RateLimitError(msg, response=response, body="")
 
         with patch(
-            "src.generator.ChatOpenAI.invoke",
+            "app.generator.ChatOpenAI.invoke",
             side_effect=raise_error("OpenAI rate limit"),
         ), patch(
-            "src.generator.ChatDeepSeek.invoke",
+            "app.generator.ChatDeepSeek.invoke",
             side_effect=raise_error("DeepSeek rate limit"),
         ):
             generator = Generator()

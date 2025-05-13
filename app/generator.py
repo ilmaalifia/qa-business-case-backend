@@ -1,6 +1,8 @@
 import os
 from typing import List
 
+from app.state import OutputState
+from app.utils import CONTEXT_DOCS, MAX_RETRY, TIMEOUT
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
@@ -8,8 +10,6 @@ from langchain_core.runnables import RunnableLambda
 from langchain_deepseek import ChatDeepSeek
 from langchain_openai import ChatOpenAI
 from openai import APIError, APITimeoutError, BadRequestError
-from src.state import OutputState
-from src.utils import CONTEXT_DOCS, MAX_RETRY, TIMEOUT
 
 load_dotenv()
 

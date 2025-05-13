@@ -1,6 +1,6 @@
 import unittest
 
-from src.graph import graph as compiled_graph
+from app.graph import graph as compiled_graph
 
 
 class TestGraphStructure(unittest.TestCase):

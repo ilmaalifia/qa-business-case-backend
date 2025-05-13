@@ -2,10 +2,10 @@ import unittest
 from typing import Any
 from unittest.mock import patch
 
+from app.retriever import Retriever
 from langchain_core.documents import Document
 from langchain_core.runnables import Runnable
 from langchain_milvus import Milvus
-from src.retriever import Retriever
 
 DOC = Document(page_content="Mock content", metadata={"source": "mock_source"})
 
@@ -56,10 +56,10 @@ class TestRetrieverFallback(unittest.TestCase):
 
     def test_all_retriever_fallback(self):
         with patch(
-            "src.retriever.TavilySearchAPIRetriever",
+            "app.retriever.TavilySearchAPIRetriever",
             return_value=MockUnvailableRunnable("Tavily is unavailable"),
         ), patch(
-            "src.retriever.Milvus",
+            "app.retriever.Milvus",
             return_value=MockMilvusRetriever(
                 MockUnvailableRunnable("Milvus is unavailable")
             ),
@@ -72,10 +72,10 @@ class TestRetrieverFallback(unittest.TestCase):
     def test_tavily_fallback(self):
         """Test if Tavily retriever is unavailable."""
         with patch(
-            "src.retriever.TavilySearchAPIRetriever",
+            "app.retriever.TavilySearchAPIRetriever",
             return_value=MockUnvailableRunnable("Tavily is unavailable"),
         ), patch(
-            "src.retriever.Milvus",
+            "app.retriever.Milvus",
             return_value=MockMilvusRetriever(MockReturnRunnable()),
         ):
             retriever = Retriever()
@@ -88,10 +88,10 @@ class TestRetrieverFallback(unittest.TestCase):
     def test_tavily_fallback(self):
         """Test if Milvus retriever is unavailable."""
         with patch(
-            "src.retriever.TavilySearchAPIRetriever",
+            "app.retriever.TavilySearchAPIRetriever",
             return_value=MockReturnRunnable(),
         ), patch(
-            "src.retriever.Milvus",
+            "app.retriever.Milvus",
             return_value=MockMilvusRetriever(
                 MockUnvailableRunnable("Milvus is unavailable")
             ),

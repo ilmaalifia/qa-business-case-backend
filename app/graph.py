@@ -1,9 +1,9 @@
+from app.generator import Generator
+from app.retriever import Retriever
+from app.state import ContextState, InputState, OutputState, OverallState
+from app.utils import CONTEXT_DOCS, convert_document_to_additional_source
 from dotenv import load_dotenv
 from langgraph.graph import END, START, StateGraph
-from src.generator import Generator
-from src.retriever import Retriever
-from src.state import ContextState, InputState, OutputState, OverallState
-from src.utils import CONTEXT_DOCS, convert_document_to_additional_source
 
 load_dotenv()
 

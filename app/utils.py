@@ -1,8 +1,8 @@
 import logging
 import sys
 
+from app.state import AdditionalSource
 from langchain_core.documents import Document
-from src.state import AdditionalSource
 
 TIMEOUT = 20  # seconds
 MAX_RETRY = 2
