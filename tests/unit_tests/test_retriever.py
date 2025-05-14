@@ -63,6 +63,12 @@ class TestRetrieverFallback(unittest.TestCase):
             return_value=MockMilvusRetriever(
                 MockUnvailableRunnable("Milvus is unavailable")
             ),
+        ), patch(
+            "app.retriever.ArxivRetriever",
+            return_value=MockUnvailableRunnable("Arxiv is unavailable"),
+        ), patch(
+            "app.retriever.PubMedRetriever",
+            return_value=MockUnvailableRunnable("PubMed is unavailable"),
         ):
             retriever = Retriever()
             question = "Testing question for all retrievers fallback"
@@ -77,6 +83,12 @@ class TestRetrieverFallback(unittest.TestCase):
         ), patch(
             "app.retriever.Milvus",
             return_value=MockMilvusRetriever(MockReturnRunnable()),
+        ), patch(
+            "app.retriever.ArxivRetriever",
+            return_value=MockReturnRunnable(),
+        ), patch(
+            "app.retriever.PubMedRetriever",
+            return_value=MockReturnRunnable(),
         ):
             retriever = Retriever()
             question = "Testing question for Tavily fallback"
@@ -85,7 +97,7 @@ class TestRetrieverFallback(unittest.TestCase):
             self.assertEqual(results[0].page_content, DOC.page_content)
             self.assertEqual(results[0].metadata["source"], DOC.metadata["source"])
 
-    def test_tavily_fallback(self):
+    def test_milvus_fallback(self):
         """Test if Milvus retriever is unavailable."""
         with patch(
             "app.retriever.TavilySearchAPIRetriever",
@@ -95,9 +107,59 @@ class TestRetrieverFallback(unittest.TestCase):
             return_value=MockMilvusRetriever(
                 MockUnvailableRunnable("Milvus is unavailable")
             ),
+        ), patch(
+            "app.retriever.ArxivRetriever",
+            return_value=MockReturnRunnable(),
+        ), patch(
+            "app.retriever.PubMedRetriever",
+            return_value=MockReturnRunnable(),
         ):
             retriever = Retriever()
             question = "Testing question for Milvus fallback"
+            results = retriever().invoke(question)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0].page_content, DOC.page_content)
+            self.assertEqual(results[0].metadata["source"], DOC.metadata["source"])
+
+    def test_arxiv_fallback(self):
+        """Test if Arxiv retriever is unavailable."""
+        with patch(
+            "app.retriever.TavilySearchAPIRetriever",
+            return_value=MockReturnRunnable(),
+        ), patch(
+            "app.retriever.Milvus",
+            return_value=MockMilvusRetriever(MockReturnRunnable()),
+        ), patch(
+            "app.retriever.ArxivRetriever",
+            return_value=MockUnvailableRunnable("Arxiv is unavailable"),
+        ), patch(
+            "app.retriever.PubMedRetriever",
+            return_value=MockReturnRunnable(),
+        ):
+            retriever = Retriever()
+            question = "Testing question for Arxiv fallback"
+            results = retriever().invoke(question)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0].page_content, DOC.page_content)
+            self.assertEqual(results[0].metadata["source"], DOC.metadata["source"])
+
+    def test_pubmed_fallback(self):
+        """Test if PubMed retriever is unavailable."""
+        with patch(
+            "app.retriever.TavilySearchAPIRetriever",
+            return_value=MockReturnRunnable(),
+        ), patch(
+            "app.retriever.Milvus",
+            return_value=MockMilvusRetriever(MockReturnRunnable()),
+        ), patch(
+            "app.retriever.ArxivRetriever",
+            return_value=MockReturnRunnable(),
+        ), patch(
+            "app.retriever.PubMedRetriever",
+            return_value=MockUnvailableRunnable("PubMed is unavailable"),
+        ):
+            retriever = Retriever()
+            question = "Testing question for PubMed fallback"
             results = retriever().invoke(question)
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0].page_content, DOC.page_content)
