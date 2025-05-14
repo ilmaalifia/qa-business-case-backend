@@ -1,5 +1,7 @@
 {
-    "dependencies": ["."],
+    "dependencies": [
+        "."
+    ],
     "graphs": {
         "qa_system_for_business_case": "./app/graph.py:graph"
     },

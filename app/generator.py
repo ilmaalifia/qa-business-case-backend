@@ -50,7 +50,7 @@ class Generator:
         return (
             "\n"
             + "\n\n---\n\n".join(
-                f"Source: {doc.metadata['source']}\nPage: {doc.metadata.get("page")}\nInformation: {doc.page_content}"
+                f"Source: {doc.metadata.get('source') or doc.metadata.get('Entry ID') or f'https://pubmed.ncbi.nlm.nih.gov/{doc.metadata.get('uid')}'}\nPage: {doc.metadata.get('page')}\nInformation: {doc.page_content}"
                 for doc in docs
             )
             + "\n"
