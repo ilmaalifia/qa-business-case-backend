@@ -21,7 +21,7 @@ class Retriever:
         self,
     ):
         retrievers = []
-        self.top_k = os.getenv("TOP_K", 20)
+        self.top_k = int(os.getenv("TOP_K", "20"))
         if get_bool_env("MILVUS_ENABLE"):
             milvus_client = Milvus(
                 embedding_function=[
