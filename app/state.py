@@ -85,8 +85,8 @@ class OutputState(TypedDict):
         "The answer to the user question, which is based only on the given context. If the given context is insufficient, the answer should explain that the context is insufficient.",
     ]
     citations: Annotated[
-        List[Citation],
-        ...,
+        Optional[List[Citation]],
+        [],
         "The list of citations used to justify the answer and exist in the given context. If the given context is not used as citation, move it to additional_sources.",
     ]
     additional_sources: Annotated[

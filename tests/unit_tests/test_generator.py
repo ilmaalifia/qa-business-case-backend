@@ -3,7 +3,7 @@ from typing import Any
 from unittest.mock import patch
 
 import httpx
-from app.generator import Generator
+from app.generator import PROHIBITION_PROMPT, Generator
 from app.utils import convert_document_to_additional_source
 from langchain_core.documents import Document
 from langchain_core.prompts import (
@@ -94,3 +94,16 @@ class TestGenerator(unittest.TestCase):
             question = "Testing question for generator fallback"
             result = chain.invoke(question)
             self.assertEqual(result, LLM_FALLBACK)
+
+    def test_conditional_prohibition_prompt(self):
+        chain = {
+            "question": RunnablePassthrough(),
+            "context": RunnableLambda(lambda x: CONTEXT),
+        } | self.generator()
+        question = "What is my name?"  # This question is not in the context
+        result = chain.invoke(question)
+        self.assertIn(
+            PROHIBITION_PROMPT,
+            result["answer"],
+        )
+        self.assertEqual(result["citations"], [])
