@@ -3,7 +3,7 @@
         "."
     ],
     "graphs": {
-        "qa_system_for_business_case": "./app/graph.py:graph"
+        "qa-system-for-business-case": "./app/graph.py:graph"
     },
     "env": ".env",
     "python_version": "3.13"
