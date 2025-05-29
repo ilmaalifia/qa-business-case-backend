@@ -1,8 +1,10 @@
 import os
+from typing import List
 
 from app.utils import RRF_CONSTANT, get_bool_env, setup_logger
 from dotenv import load_dotenv
 from langchain.retrievers import EnsembleRetriever
+from langchain.schema import Document
 from langchain_community.retrievers import ArxivRetriever, PubMedRetriever
 from langchain_community.retrievers.tavily_search_api import (
     SearchDepth,
@@ -14,6 +16,24 @@ from langchain_milvus import BM25BuiltInFunction, Milvus
 
 logger = setup_logger(__name__)
 load_dotenv()
+
+
+class CustomArxivRetriever(ArxivRetriever):
+    def _get_relevant_documents(self, query: str, *, run_manager) -> List[Document]:
+        docs = super()._get_relevant_documents(query, run_manager=run_manager)
+        for doc in docs:
+            doc.metadata["source"] = doc.metadata.pop("Entry ID")
+        return docs
+
+
+class CustomPubMedRetriever(PubMedRetriever):
+    def _get_relevant_documents(self, query: str, *, run_manager) -> List[Document]:
+        docs = super()._get_relevant_documents(query, run_manager=run_manager)
+        for doc in docs:
+            doc.metadata["source"] = (
+                f"https://pubmed.ncbi.nlm.nih.gov/{doc.metadata.pop("uid")}"
+            )
+        return docs
 
 
 class Retriever:
@@ -70,7 +90,7 @@ class Retriever:
             retrievers.append(self.tavily)
 
         if get_bool_env("ARXIV_ENABLE"):
-            self.arxiv = ArxivRetriever(
+            self.arxiv = CustomArxivRetriever(
                 load_max_docs=self.top_k,
                 get_full_documents=False,
                 tags=["arxiv"],
@@ -78,7 +98,7 @@ class Retriever:
             retrievers.append(self.arxiv)
 
         if get_bool_env("PUBMED_ENABLE"):
-            self.pubmed = PubMedRetriever(
+            self.pubmed = CustomPubMedRetriever(
                 api_key=os.getenv("PUBMED_API_KEY"),
                 top_k_results=self.top_k,
                 sleep_time=0.5,
@@ -92,11 +112,7 @@ class Retriever:
         return EnsembleRetriever(
             retrievers=retrievers,
             c=RRF_CONSTANT,
-            id_key=(
-                None
-                if (get_bool_env("ARXIV_ENABLE") or get_bool_env("PUBMED_ENABLE"))
-                else "source"
-            ),
+            id_key="source",
             tags=["ensemble"],
         )
 

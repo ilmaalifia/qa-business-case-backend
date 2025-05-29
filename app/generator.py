@@ -2,7 +2,7 @@ import os
 from typing import List
 
 from app.state import OutputState
-from app.utils import CONTEXT_DOCS, MAX_RETRY, TIMEOUT
+from app.utils import CONTEXT_DOCS, MAX_RETRY, TEMPERATURE, TIMEOUT
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
@@ -37,6 +37,7 @@ class Generator:
                     timeout=TIMEOUT,
                     max_retries=MAX_RETRY,
                     tags=[llm_provider.lower()],
+                    temperature=TEMPERATURE,
                 )
             case "DEEPSEEK":
                 self.llm = ChatDeepSeek(
@@ -44,6 +45,7 @@ class Generator:
                     timeout=TIMEOUT,
                     max_retries=MAX_RETRY,
                     tags=[llm_provider.lower()],
+                    temperature=TEMPERATURE,
                 )
             case _:
                 raise ValueError(f"Unsupported LLM provider: {llm_provider}")

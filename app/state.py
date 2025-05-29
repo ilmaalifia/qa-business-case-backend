@@ -10,6 +10,9 @@ class Citation(TypedDict):
     url: Annotated[
         str, ..., "The valid URL of the SPECIFIC source which justifies the answer."
     ]
+    snippet: Annotated[
+        str, ..., "The snippet of the source which justifies the answer."
+    ]
     page: Annotated[
         Optional[int], ..., "Page number of the PDF source which justifies the answer."
     ]
