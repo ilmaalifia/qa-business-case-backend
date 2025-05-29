@@ -64,10 +64,10 @@ class TestRetrieverFallback(unittest.TestCase):
                 MockUnvailableRunnable("Milvus is unavailable")
             ),
         ), patch(
-            "app.retriever.ArxivRetriever",
+            "app.retriever.CustomArxivRetriever",
             return_value=MockUnvailableRunnable("Arxiv is unavailable"),
         ), patch(
-            "app.retriever.PubMedRetriever",
+            "app.retriever.CustomPubMedRetriever",
             return_value=MockUnvailableRunnable("PubMed is unavailable"),
         ):
             retriever = Retriever()
@@ -84,10 +84,10 @@ class TestRetrieverFallback(unittest.TestCase):
             "app.retriever.Milvus",
             return_value=MockMilvusRetriever(MockReturnRunnable()),
         ), patch(
-            "app.retriever.ArxivRetriever",
+            "app.retriever.CustomArxivRetriever",
             return_value=MockReturnRunnable(),
         ), patch(
-            "app.retriever.PubMedRetriever",
+            "app.retriever.CustomPubMedRetriever",
             return_value=MockReturnRunnable(),
         ):
             retriever = Retriever()
@@ -108,10 +108,10 @@ class TestRetrieverFallback(unittest.TestCase):
                 MockUnvailableRunnable("Milvus is unavailable")
             ),
         ), patch(
-            "app.retriever.ArxivRetriever",
+            "app.retriever.CustomArxivRetriever",
             return_value=MockReturnRunnable(),
         ), patch(
-            "app.retriever.PubMedRetriever",
+            "app.retriever.CustomPubMedRetriever",
             return_value=MockReturnRunnable(),
         ):
             retriever = Retriever()
@@ -130,10 +130,10 @@ class TestRetrieverFallback(unittest.TestCase):
             "app.retriever.Milvus",
             return_value=MockMilvusRetriever(MockReturnRunnable()),
         ), patch(
-            "app.retriever.ArxivRetriever",
+            "app.retriever.CustomArxivRetriever",
             return_value=MockUnvailableRunnable("Arxiv is unavailable"),
         ), patch(
-            "app.retriever.PubMedRetriever",
+            "app.retriever.CustomPubMedRetriever",
             return_value=MockReturnRunnable(),
         ):
             retriever = Retriever()
@@ -152,10 +152,10 @@ class TestRetrieverFallback(unittest.TestCase):
             "app.retriever.Milvus",
             return_value=MockMilvusRetriever(MockReturnRunnable()),
         ), patch(
-            "app.retriever.ArxivRetriever",
+            "app.retriever.CustomArxivRetriever",
             return_value=MockReturnRunnable(),
         ), patch(
-            "app.retriever.PubMedRetriever",
+            "app.retriever.CustomPubMedRetriever",
             return_value=MockUnvailableRunnable("PubMed is unavailable"),
         ):
             retriever = Retriever()
