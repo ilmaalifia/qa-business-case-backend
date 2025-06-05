@@ -2,7 +2,7 @@
 
 > This code is part of master thesis titled "Accelerating Business Case Development with Context-Aware AI: A Question Answering System Integrating PDF Corpora and Web Retrieval"
 
-`qa-system-for-business-case` is a question answering system designed to enhance business case development process by accelerating knowledge and data acquisition process by providing answer with references. Built using [LangGraph](https://langchain-ai.github.io/langgraph/).
+`qa-system-for-business-case` is a question answering system designed to enhance the business case development by accelerating knowledge and data acquisition process. It provides answers along with supporting references to help users make informed decisions. Built using [LangGraph](https://langchain-ai.github.io/langgraph/).
 
 ## 🖥️ Tested Machine Specs
 
