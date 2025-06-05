@@ -73,8 +73,20 @@ MILVUS_TOKEN=your-milvus-token
 
 ## 🚀 How to Run
 
-Run the the code using the following command:
+Run the the code using dev mode to enable LangSmith UI using the following command:
 
 ```bash
 langgraph dev
+```
+
+## 🧪 Running Tests
+
+To ensure everything is working correctly, this project includes automated tests that can be run using [pytest](https://docs.pytest.org/en/stable/).
+
+1. Make sure your environment is set up and dependencies are installed (see Setup Instructions).
+
+2. Run the tests from the project root directory:
+
+```bash
+pytest
 ```
