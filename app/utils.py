@@ -7,9 +7,13 @@ from langchain_core.documents import Document
 
 TIMEOUT = 20  # seconds
 MAX_RETRY = 2
-RRF_CONSTANT = 60
-CONTEXT_DOCS = 5  # number of context documents to be used in the prompt
-TEMPERATURE = 0.0  # deterministic output
+RRF_CONSTANT = int(os.getenv("RRF_CONSTANT", "60"))
+CONTEXT_DOCS = int(
+    os.getenv("CONTEXT_DOCS", "5")
+)  # number of context documents to be used in the prompt
+TEMPERATURE = float(
+    os.getenv("TEMPERATURE", "0.0")
+)  # 0.0 (deterministic) - 1.0 (random)
 
 
 def setup_logger(name=__name__):
