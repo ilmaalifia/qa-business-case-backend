@@ -12,8 +12,8 @@ from langchain_openai import ChatOpenAI
 from openai import APIError, APITimeoutError, BadRequestError
 
 load_dotenv()
-PROHIBITION_PROMPT = (
-    "I don't know the answer to that question due to insufficient context."
+NO_ANSWER_PROMPT = (
+    '"I don\'t know the answer to that question due to insufficient context."'
 )
 
 
@@ -23,9 +23,9 @@ class Generator:
             [
                 (
                     "system",
-                    f"You are a helpful assistant that answers a question based on the {CONTEXT_DOCS} context documents provided. If you don't know the answer or the context is insufficient, say {PROHIBITION_PROMPT}.",
+                    f"You are a reliable document analysis assistant that answers questions strictly based on the {CONTEXT_DOCS} provided context documents. If the context is missing, empty, or insufficient, reply with: {NO_ANSWER_PROMPT}. Avoid assumptions, hallucination, and harmful content. Stay factual, clear, and grounded in the context only.",
                 ),
-                ("human", "Context: {context}\nQuestion: {question}"),
+                ("human", "Contexts: {context}\nQuestion: {question}"),
             ],
         )
 

@@ -1,9 +1,8 @@
 import unittest
-from typing import Any
 from unittest.mock import patch
 
 import httpx
-from app.generator import PROHIBITION_PROMPT, Generator
+from app.generator import NO_ANSWER_PROMPT, Generator
 from app.utils import convert_document_to_additional_source
 from langchain_core.documents import Document
 from langchain_core.prompts import (
@@ -95,7 +94,7 @@ class TestGenerator(unittest.TestCase):
             result = chain.invoke(question)
             self.assertEqual(result, LLM_FALLBACK)
 
-    def test_conditional_prohibition_prompt(self):
+    def test_conditional_prohibition(self):
         chain = {
             "question": RunnablePassthrough(),
             "context": RunnableLambda(lambda x: CONTEXT),
@@ -103,7 +102,7 @@ class TestGenerator(unittest.TestCase):
         question = "What is my name?"  # This question is not in the context
         result = chain.invoke(question)
         self.assertIn(
-            PROHIBITION_PROMPT,
+            NO_ANSWER_PROMPT.strip('"'),
             result["answer"],
         )
         self.assertEqual(result["citations"], [])
