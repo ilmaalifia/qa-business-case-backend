@@ -4,15 +4,26 @@
 
 `qa-system-for-business-case` is a question answering system designed to enhance the business case development by accelerating knowledge and data acquisition process. It provides answers along with supporting references to help users make informed decisions. Built using [LangGraph](https://langchain-ai.github.io/langgraph/).
 
-## 🖥️ Tested Machine Specs
+## 🖥️ Requirements
 
-This project has been tested on the following systems:
+### ✅ Supported Systems
 
-| OS       | CPU      | RAM  | Python Version |
-| -------- | -------- | ---- | -------------- |
-| macOS 15 | Apple M2 | 8 GB | 3.13           |
+This project has been tested on the following system configuration:
 
-## ⚙️ Setup Instructions
+| Operating System | Chip                              | RAM  | Python Version |
+| ---------------- | --------------------------------- | ---- | -------------- |
+| macOS 15         | Apple M2 (8-Core CPU, 8-Core GPU) | 8 GB | 3.13           |
+
+> ℹ️ Other systems may work but have not been officially tested.
+
+### 📦 External Dependencies
+
+1. **Milvus** – Required if `MILVUS_ENABLE=true` in `.env` file for accessing preprocessed PDF document from [reverse-pdf-scraper](https://github.com/ilmaalifia/reverse-pdf-scraper).
+2. **Tavily API Key** – Required if `TAVILY_ENABLE=true` in `.env` file for web search capabilities. You can obtain a key from Tavily.
+3. **PubMed API Key** – Required if `PUBMED_ENABLE=true` in `.env` file for accessing PubMed scientific literature. You can register for an API key at NCBI.
+4. **LLM API Key** – Required to access a language model (currently only supports OpenAI and DeepSeek). Make sure to configure your environment with the appropriate key for your provider.
+
+## ⚙️ Setup Python Environment
 
 You can set up the environment using either **Conda/Miniconda** or **Python venv**.
 
@@ -83,7 +94,7 @@ langgraph dev
 
 To ensure everything is working correctly, this project includes automated tests that can be run using [pytest](https://docs.pytest.org/en/stable/).
 
-1. Make sure your environment is set up and dependencies are installed (see Setup Instructions).
+1. Make sure your environment is set up and dependencies are installed (see Setup Python Environment).
 
 2. Run the tests from the project root directory:
 
