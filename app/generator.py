@@ -2,7 +2,7 @@ import os
 from typing import List
 
 from app.state import OutputState
-from app.utils import CONTEXT_DOCS, MAX_RETRY, TEMPERATURE, TIMEOUT
+from app.utils import MAX_RETRY, NUMBER_OF_CONTEXT_DOCS, TEMPERATURE, TIMEOUT
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
@@ -23,7 +23,7 @@ class Generator:
             [
                 (
                     "system",
-                    f"You are a reliable document analysis assistant that answers questions strictly based on the {CONTEXT_DOCS} provided context documents. If the context is missing, empty, or insufficient, reply with: {NO_ANSWER_PROMPT}. Avoid assumptions, hallucination, and harmful content. Stay factual, clear, and grounded in the context only.",
+                    f"You are a reliable document analysis assistant that answers questions strictly based on the {NUMBER_OF_CONTEXT_DOCS} provided context documents. If the context is missing, empty, or insufficient, reply with: {NO_ANSWER_PROMPT}. Avoid assumptions, hallucination, and harmful content. Stay factual, clear, and grounded in the context only.",
                 ),
                 ("human", "Contexts: {context}\nQuestion: {question}"),
             ],

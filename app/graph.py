@@ -1,7 +1,7 @@
 from app.generator import Generator
 from app.retriever import Retriever
 from app.state import ContextState, InputState, OutputState, OverallState
-from app.utils import CONTEXT_DOCS, convert_document_to_additional_source
+from app.utils import NUMBER_OF_CONTEXT_DOCS, convert_document_to_additional_source
 from dotenv import load_dotenv
 from langgraph.graph import END, START, StateGraph
 
@@ -15,8 +15,8 @@ async def retriever_node(state: InputState) -> ContextState:
     retrieved_docs = await retriever().ainvoke(state["question"])
     return {
         "question": state["question"],
-        "context": retrieved_docs[:CONTEXT_DOCS],
-        "additional_sources": retrieved_docs[CONTEXT_DOCS:],
+        "context": retrieved_docs[:NUMBER_OF_CONTEXT_DOCS],
+        "additional_sources": retrieved_docs[NUMBER_OF_CONTEXT_DOCS:],
     }
 
 
