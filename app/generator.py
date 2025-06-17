@@ -55,7 +55,7 @@ class Generator:
         return (
             "\n"
             + "\n\n---\n\n".join(
-                f"Source: {doc.metadata.get('source') or doc.metadata.get('Entry ID') or f'https://pubmed.ncbi.nlm.nih.gov/{doc.metadata.get('uid')}'}\nPage: {doc.metadata.get('page')}\nInformation: {doc.page_content}"
+                f"Source: {doc.metadata.get('source')}\nPage: {doc.metadata.get('page')}\nInformation: {doc.page_content}"
                 for doc in docs
             )
             + "\n"
@@ -77,7 +77,7 @@ class Generator:
         return [
             RunnableLambda(
                 lambda x: {
-                    "answer": "Unable to answer the question due to error. Please try again.",
+                    "answer": "Unable to answer the question due to error. Please check the logs for details.",
                     "citations": [],
                     "additional_sources": [],
                 }

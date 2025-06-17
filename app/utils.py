@@ -37,11 +37,7 @@ def setup_logger(name=__name__):
 def convert_document_to_additional_source(doc: Document) -> AdditionalSource:
     """Convert a Document to an Additional Source."""
     return {
-        "url": (
-            doc.metadata.get("source")
-            or doc.metadata.get("Entry ID")
-            or f"https://pubmed.ncbi.nlm.nih.gov/{doc.metadata.get('uid')}"
-        ),
+        "url": doc.metadata.get("source"),
         "snippet": doc.page_content,
         "page": doc.metadata.get("page"),
     }
