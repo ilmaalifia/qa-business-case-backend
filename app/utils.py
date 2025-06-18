@@ -3,10 +3,13 @@ import os
 import sys
 
 from app.state import AdditionalSource
+from dotenv import load_dotenv
 from langchain_core.documents import Document
 
-TIMEOUT = 20  # seconds
-MAX_RETRY = 2
+load_dotenv()
+
+TIMEOUT = 60  # seconds
+MAX_RETRY = 3
 RRF_CONSTANT = int(os.getenv("RRF_CONSTANT", "60"))
 NUMBER_OF_CONTEXT_DOCS = int(
     os.getenv("NUMBER_OF_CONTEXT_DOCS", "5")

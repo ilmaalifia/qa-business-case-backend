@@ -12,9 +12,15 @@ from langchain_openai import ChatOpenAI
 from openai import APIError, APITimeoutError, BadRequestError
 
 load_dotenv()
+
 NO_ANSWER_PROMPT = (
     '"I don\'t know the answer to that question due to insufficient context."'
 )
+GENERATOR_FALLBACK = {
+    "answer": "Unable to answer the question due to API error. Please check the logs for details.",
+    "citations": [],
+    "additional_sources": [],
+}
 
 
 class Generator:
@@ -23,7 +29,7 @@ class Generator:
             [
                 (
                     "system",
-                    f"You are a reliable document analysis assistant that answers questions strictly based on the {NUMBER_OF_CONTEXT_DOCS} provided context documents. If the context is missing, empty, or insufficient, reply with: {NO_ANSWER_PROMPT}. Avoid assumptions, hallucination, and harmful content. Stay factual, clear, and grounded in the context only.",
+                    f"You are a reliable document analysis assistant that answers questions strictly based on the {NUMBER_OF_CONTEXT_DOCS} provided context documents. If the context is missing, empty, or insufficient, reply with: {NO_ANSWER_PROMPT}. Avoid assumptions, hallucination, and harmful content. Stay factual, clear, grounded in the context, and return only valid JSON.",
                 ),
                 ("human", "Contexts: {context}\nQuestion: {question}"),
             ],
@@ -33,7 +39,7 @@ class Generator:
         match llm_provider:
             case "OPENAI":
                 self.llm = ChatOpenAI(
-                    model="gpt-4o",
+                    model="gpt-4.1",
                     timeout=TIMEOUT,
                     max_retries=MAX_RETRY,
                     tags=[llm_provider.lower()],
@@ -74,12 +80,4 @@ class Generator:
         )
 
     def __generator_fallback(self):
-        return [
-            RunnableLambda(
-                lambda x: {
-                    "answer": "Unable to answer the question due to error. Please check the logs for details.",
-                    "citations": [],
-                    "additional_sources": [],
-                }
-            )
-        ]
+        return [RunnableLambda(lambda x: GENERATOR_FALLBACK)]

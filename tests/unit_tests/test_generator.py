@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 
 import httpx
-from app.generator import NO_ANSWER_PROMPT, Generator
+from app.generator import GENERATOR_FALLBACK, NO_ANSWER_PROMPT, Generator
 from app.utils import convert_document_to_additional_source
 from langchain_core.documents import Document
 from langchain_core.prompts import (
@@ -34,12 +34,6 @@ Source: https://mock_source_2.com/mock.pdf
 Page: 2
 Information: This is another mock document for testing purposes.
 """
-
-LLM_FALLBACK = {
-    "answer": "Unable to answer the question due to error. Please try again.",
-    "citations": [],
-    "additional_sources": [],
-}
 
 
 class TestGenerator(unittest.TestCase):
@@ -92,7 +86,7 @@ class TestGenerator(unittest.TestCase):
             } | generator()
             question = "Testing question for generator fallback"
             result = chain.invoke(question)
-            self.assertEqual(result, LLM_FALLBACK)
+            self.assertEqual(result, GENERATOR_FALLBACK)
 
     def test_conditional_prohibition(self):
         chain = {
