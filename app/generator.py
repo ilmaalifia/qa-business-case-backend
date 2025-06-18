@@ -29,7 +29,7 @@ class Generator:
             [
                 (
                     "system",
-                    f"You are a reliable document analysis assistant that answers questions strictly based on the {NUMBER_OF_CONTEXT_DOCS} provided context documents. If the context is missing, empty, or insufficient, reply with: {NO_ANSWER_PROMPT}. Avoid assumptions, hallucination, and harmful content. Stay factual, clear, grounded in the context, and return only valid JSON.",
+                    f"You are a reliable document analysis assistant that answers questions strictly based on the {NUMBER_OF_CONTEXT_DOCS} provided context documents. If the context is missing, empty, or insufficient, reply with: {NO_ANSWER_PROMPT}. Avoid assumptions, hallucination, and harmful content. Stay factual, clear, and grounded in the context. IMPORTANT: Return only valid JSON.",
                 ),
                 ("human", "Contexts: {context}\nQuestion: {question}"),
             ],
