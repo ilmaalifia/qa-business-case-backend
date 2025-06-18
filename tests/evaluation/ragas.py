@@ -111,9 +111,12 @@ async def main():
 
             # Calculate average semantic similarity per group
             avg_semantic_similarity_score = avg_semantic_similarity(answers)
+            logger.info(
+                f"Group {id} - Average Semantic Similarity: {avg_semantic_similarity_score}"
+            )
             final_result[id]["avg_semantic_similarity"] = avg_semantic_similarity_score
 
-    logger.info(f"Average semantic similarity: {json.dumps(final_result)}")
+    logger.info(f"Average Semantic Similarity: {json.dumps(final_result)}")
 
 
 if __name__ == "__main__":
