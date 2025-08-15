@@ -43,7 +43,7 @@ You can set up the environment using either **Conda/Miniconda** or **Python venv
    pip install -r requirements.txt
    ```
 
-## 🔐 Setup Credential File and Update USER_AGENT
+## 🔐 Setup Credential File
 
 1. Copy the example file `.env.example` as `.env`:
 
@@ -52,12 +52,13 @@ cp .env.example .env          # macOS/Linux
 copy .env.example .env        # Windows
 ```
 
-2. Open the `.env` file in a text editor and fill in the required values, for example:
+2. Open the `.env` file in a text editor and fill in the required values. Ensure the Milvus details are similar with the `.env` file in Reverse PDF Scraper:
 
 ```env
 ...
 MILVUS_URI=your-milvus-uri
 MILVUS_TOKEN=your-milvus-token
+MILVUS_COLLECTION=your-collection-name
 ...
 ```
 
@@ -65,7 +66,7 @@ MILVUS_TOKEN=your-milvus-token
 
 ## 🚀 How to Run
 
-Run the the code using dev mode to enable LangSmith UI using the following command:
+Run the the code using dev mode to enable LangGraph Studio for frontend using the following command:
 
 ```bash
 langgraph dev
